@@ -22,9 +22,8 @@ def main():
     symbol = "BTCUSDT"
     while True:
         try:
-            message_to_send = message.format(
-                symbol=symbol, price=binance_client.get_trade_price(symbol)
-            )
+            price = binance_client.get_trade_price(symbol)
+            message_to_send = message.format(symbol=symbol, price=price)
             send_message(message_to_send, *args)
         except Exception as e:
             error_message = f" Сбой в работе программы: {e}"

@@ -6,7 +6,7 @@ import requests as requests
 
 
 class BinanceClient:
-    BASE_URL = "https://api.binance.com"
+    BASE_URL = "https://api.binance.co"
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
@@ -25,11 +25,8 @@ class BinanceClient:
         try:
             response = requests.get(urljoin(BinanceClient.BASE_URL, url), params)
             response.raise_for_status()
-        except requests.HTTPError as e:
-            self.logger.error(
-                "Failed to retrieve data from target url. Code: "
-                f"{response.status_code}, error: {e}"
-            )
+        except requests.RequestException as e:
+            self.logger.error("Failed to retrieve data from target url. Error: {e}")
             raise e
         try:
             return response.json()
