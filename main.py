@@ -1,12 +1,18 @@
 """Send to telegram price of BTCUSDT every minute."""
 import logging
 import os
+import sys
 import time
 
 from dotenv import load_dotenv
 
 from binanceclient import BinanceClient
+from exceptions import BinanceEnvironmentError
 from utils import send_message
+
+
+def check_tokens(telegram_token, chat_id):
+    return bool(telegram_token and chat_id)
 
 
 def main():
@@ -16,6 +22,9 @@ def main():
     load_dotenv()
     telegram_token = os.getenv("TELEGRAM_TOKEN", "")
     chat_id = os.getenv("TELEGRAM_CHAT_ID", "")
+    if not check_tokens(telegram_token, chat_id):
+        logger.critical("Can not retrive enviroments")
+        raise BinanceEnvironmentError("Can not retrive enviroments")
     args = (telegram_token, chat_id)
     binance_client = BinanceClient()
     message = "{symbol} = {price}"

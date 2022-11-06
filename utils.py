@@ -2,10 +2,12 @@ import logging
 
 import telegram
 
+from exceptions import TelegramError
+
 logger = logging.getLogger(__name__)
 
 
-def send_message(message: str, tlgm_token, chat_id):
+def send_message(message: str, tlgm_token: str, chat_id: str) -> telegram.Message:
     """Send message to telegram chat.
 
     Args:
@@ -20,8 +22,9 @@ def send_message(message: str, tlgm_token, chat_id):
     try:
         bot = telegram.Bot(token=tlgm_token)
         posted_message = bot.send_message(chat_id=chat_id, text=message)
+    except telegram.error.TelegramError as e:
+        raise TelegramError(f'Ошибка отправки телеграм сообщения: {e}')
+    else:
         logger.info(f'Message has sent to Telegram: "{message}"')
         return posted_message
-    except telegram.error.TelegramError as e:
-        logger.error(e)
-        raise e
+
