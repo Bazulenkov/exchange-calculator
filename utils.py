@@ -23,8 +23,6 @@ def send_message(message: str, tlgm_token: str, chat_id: str) -> telegram.Messag
         bot = telegram.Bot(token=tlgm_token)
         posted_message = bot.send_message(chat_id=chat_id, text=message)
     except telegram.error.TelegramError as e:
-        raise TelegramError(f'Ошибка отправки телеграм сообщения: {e}')
-    else:
-        logger.info(f'Message has sent to Telegram: "{message}"')
-        return posted_message
-
+        raise TelegramError(f"Ошибка отправки телеграм сообщения: {e}")
+    logger.info(f'Message has sent to Telegram: "{message}"')
+    return posted_message

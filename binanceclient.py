@@ -20,13 +20,13 @@ class BinanceClient:
         self._logger.setLevel(logging.DEBUG)
         self._logger.addHandler(handler)
 
-    def _request_to_binance(self, url: str, symbol: str):
+    @staticmethod
+    def _request_to_binance(url: str, symbol: str):
         params = {"symbol": symbol, "limit": 1}
         try:
             response = requests.get(urljoin(BinanceClient.BASE_URL, url), params)
             response.raise_for_status()
         except requests.RequestException as e:
-            self._logger.error("Failed to retrieve data from target url. Error: {e}")
             raise e
         try:
             return response.json()
@@ -38,11 +38,7 @@ class BinanceClient:
         data = self._request_to_binance(url, symbol)
         try:
             price = data[0]["price"]
-            self._logger.info(f"Price for {symbol} received.")
-            return price
         except (IndexError, KeyError) as e:
-            self._logger.error(
-                "Failed to get price from data. Check format of response.json. "
-                f"Error: {e}"
-            )
             raise e
+        self._logger.info(f"Price for {symbol} received.")
+        return price
