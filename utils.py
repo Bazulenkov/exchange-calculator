@@ -1,28 +1,45 @@
+import functools
 import logging
+from typing import Callable, TypeVar, Union
 
 import telegram
 
-from exceptions import TelegramError
-
 logger = logging.getLogger(__name__)
 
+RT = TypeVar("RT")
 
-def send_message(message: str, tlgm_token: str, chat_id: str) -> telegram.Message:
+
+def log(func: Callable[..., RT], *args: object, **kwargs: object) -> Callable[..., RT]:
+    logger = logging.getLogger(func.__module__)
+
+    @functools.wraps(func)
+    def decorator(*args: object, **kwargs: object) -> RT:
+        logger.debug("Entering: %s", func.__name__)
+        result = func(*args, **kwargs)
+        logger.debug(result)
+        logger.debug("Exiting: %s", func.__name__)
+        return result
+
+    return decorator
+
+
+def send_message(
+    text: str, tlgm_token: str, chat_id: Union[int, str]
+) -> telegram.Message:
     """Send message to telegram chat.
 
     Args:
-        message: message to send.
-        chat_id: telegram chat_id.
-        tlgm_token: token for telegram bot.
+        text (:obj:`str`): Text of the message to be sent. Max 4096 characters after
+            entities parsing. Also found as :attr:`telegram.constants.MAX_MESSAGE_LENGTH`.
+        tlgm_token(:obj:`str`): Bot's unique authentication.
+        chat_id (:obj:`int` | :obj:`str`): Unique identifier for the target chat or
+            username of the target channel (in the format ``@channelusername``).
     Returns:
         :class:`telegram.Message`: On success, the sent message is returned.
     Raises:
         :class:`telegram.error.TelegramError`
     """
-    try:
-        bot = telegram.Bot(token=tlgm_token)
-        posted_message = bot.send_message(chat_id=chat_id, text=message)
-    except telegram.error.TelegramError as e:
-        raise TelegramError(f"Ошибка отправки телеграм сообщения: {e}")
-    logger.info(f'Message has sent to Telegram: "{message}"')
+    bot = telegram.Bot(token=tlgm_token)
+    posted_message = bot.send_message(chat_id=chat_id, text=text)
+    logger.info(f'Message has sent to Telegram: "{text}"')
     return posted_message

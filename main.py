@@ -1,13 +1,16 @@
 """Send to telegram price of BTCUSDT every minute."""
 import logging
 import os
+import sys
 import time
 
 from dotenv import load_dotenv
+from telegram import TelegramError
 
 from binanceclient import BinanceClient
-from exceptions import BinanceEnvironmentError
 from utils import send_message
+
+RETRY_TIME = 600
 
 
 def check_tokens(telegram_token, chat_id):
@@ -22,26 +25,41 @@ def main():
     telegram_token = os.getenv("TELEGRAM_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
     if not check_tokens(telegram_token, chat_id):
-        logger.critical("Can not retrieve environments")
-        raise BinanceEnvironmentError("Can not retrieve environments")
+        message = (
+            "There are no mandatory variables of the environment: "
+            "TELEGRAM_TOKEN, TELEGRAM_CHAT_ID. The program is forcibly stopped."
+        )
+        logger.critical(message)
+        sys.exit(message)
+
     args = (telegram_token, chat_id)
     binance_client = BinanceClient()
     message = "{symbol} = {price}"
     symbol = "BTCUSDT"
+
     while True:
         try:
             price = binance_client.get_trade_price(symbol)
             message_to_send = message.format(symbol=symbol, price=price)
             send_message(message_to_send, *args)
+        except TelegramError as e:
+            logger.error(f"TelegramError: {e}", exc_info=True)
         except Exception as e:
             error_message = f" Сбой в работе программы: {e}"
             send_message(error_message, *args)
-        time.sleep(1 * 60)
+        finally:
+            logger.info(f"Следующая проверка через {RETRY_TIME / 60} минут")
+            time.sleep(RETRY_TIME)
 
 
 if __name__ == "__main__":
     logging.basicConfig(
+        format=(
+            "%(asctime)s [%(levelname)s] - "
+            "(%(filename)s).%(funcName)s:%(lineno)d - %(message)s"
+        ),
+        # format="[%(asctime)s] (%(name)s) %(levelname)s: %(message)s",
         level=logging.DEBUG,
-        format="[%(asctime)s] (%(name)s) %(levelname)s: %(message)s",
+        handlers=[logging.StreamHandler(sys.stdout)],
     )
     main()

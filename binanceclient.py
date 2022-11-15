@@ -1,5 +1,4 @@
 import logging
-import sys
 from urllib.parse import urljoin
 
 import requests as requests
@@ -10,15 +9,6 @@ class BinanceClient:
 
     def __init__(self):
         self._logger = logging.getLogger(__name__)
-        self._init_logger()
-
-    def _init_logger(self):
-        handler = logging.StreamHandler(stream=sys.stdout)
-        handler.setFormatter(
-            logging.Formatter(fmt="[%(asctime)s: %(levelname)s] " "%(message)s")
-        )
-        self._logger.setLevel(logging.DEBUG)
-        self._logger.addHandler(handler)
 
     @staticmethod
     def _request_to_binance(url: str, symbol: str):
