@@ -5,9 +5,9 @@ import sys
 import time
 
 from dotenv import load_dotenv
-from telegram import TelegramError
 
 from binanceclient import BinanceClient
+from exceptions import TelegramError
 from utils import send_message
 
 RETRY_TIME = 600
@@ -43,12 +43,12 @@ def main():
             message_to_send = message.format(symbol=symbol, price=price)
             send_message(message_to_send, *args)
         except TelegramError as e:
-            logger.error(f"TelegramError: {e}", exc_info=True)
+            logger.error(e, exc_info=True)
         except Exception as e:
             error_message = f" Сбой в работе программы: {e}"
             send_message(error_message, *args)
         finally:
-            logger.info(f"Следующая проверка через {RETRY_TIME / 60} минут")
+            logger.info(f"The next check will be in {RETRY_TIME / 60} minutes.")
             time.sleep(RETRY_TIME)
 
 
@@ -58,7 +58,6 @@ if __name__ == "__main__":
             "%(asctime)s [%(levelname)s] - "
             "(%(filename)s).%(funcName)s:%(lineno)d - %(message)s"
         ),
-        # format="[%(asctime)s] (%(name)s) %(levelname)s: %(message)s",
         level=logging.DEBUG,
         handlers=[logging.StreamHandler(sys.stdout)],
     )

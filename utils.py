@@ -4,6 +4,8 @@ from typing import Callable, TypeVar, Union
 
 import telegram
 
+from exceptions import TelegramError
+
 logger = logging.getLogger(__name__)
 
 RT = TypeVar("RT")
@@ -39,7 +41,12 @@ def send_message(
     Raises:
         :class:`telegram.error.TelegramError`
     """
-    bot = telegram.Bot(token=tlgm_token)
-    posted_message = bot.send_message(chat_id=chat_id, text=text)
+    try:
+        bot = telegram.Bot(token=tlgm_token)
+        posted_message = bot.send_message(chat_id=chat_id, text=text)
+    except telegram.error.TelegramError as e:
+        raise TelegramError(
+            f"When trying to send a message to Telegram, an error occurred: {e}"
+        )
     logger.info(f'Message has sent to Telegram: "{text}"')
     return posted_message
