@@ -1,4 +1,5 @@
 """Send to telegram price of BTCUSDT every minute."""
+import asyncio
 import logging
 import os
 import sys
@@ -17,7 +18,7 @@ def check_tokens(telegram_token, chat_id):
     return bool(telegram_token and chat_id)
 
 
-def main():
+async def main():
     logger = logging.getLogger(__name__)
     logger.debug("Bot started")
 
@@ -39,7 +40,9 @@ def main():
 
     while True:
         try:
-            price = binance_client.get_trade_price(symbol)
+            task = asyncio.create_task(binance_client.get_trade_price(symbol))
+            price = await asyncio.gather(task)
+
             message_to_send = message.format(symbol=symbol, price=price)
             send_message(message_to_send, *args)
         except TelegramError as e:
@@ -61,4 +64,4 @@ if __name__ == "__main__":
         level=logging.DEBUG,
         handlers=[logging.StreamHandler(sys.stdout)],
     )
-    main()
+    asyncio.run(main())
