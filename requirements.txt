@@ -1,3 +1,4 @@
 aiohttp~=3.8.3
 aiologger~=0.7.0
-python-dotenv~=0.21.0
+python-dotenv~=1.0.0
+aiogram~=3.0.0rc2
