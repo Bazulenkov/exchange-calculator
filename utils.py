@@ -2,7 +2,7 @@ import functools
 import logging
 from typing import Callable, TypeVar, Union
 
-import telegram
+from aiogram import Bot, types
 
 from exceptions import TelegramError
 
@@ -25,9 +25,9 @@ def log(func: Callable[..., RT], *args: object, **kwargs: object) -> Callable[..
     return decorator
 
 
-def send_message(
-    text: str, tlgm_token: str, chat_id: Union[int, str]
-) -> telegram.Message:
+async def send_message(
+        text: str, tlgm_token: str, chat_id: Union[int, str]
+) -> types.Message:
     """Send message to telegram chat.
 
     Args:
@@ -42,9 +42,9 @@ def send_message(
         :class:`telegram.error.TelegramError`
     """
     try:
-        bot = telegram.Bot(token=tlgm_token)
-        posted_message = bot.send_message(chat_id=chat_id, text=text)
-    except telegram.error.TelegramError as e:
+        bot = Bot(token=tlgm_token)
+        posted_message = await bot.send_message(chat_id=chat_id, text=text)
+    except Exception as e:
         raise TelegramError(
             f"When trying to send a message to Telegram, an error occurred: {e}"
         )
