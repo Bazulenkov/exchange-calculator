@@ -1,3 +1,4 @@
+import logging
 from enum import Enum
 from typing import List
 from urllib.parse import urljoin
@@ -5,6 +6,7 @@ from urllib.parse import urljoin
 from aiohttp import ClientSession
 from aiologger.loggers.json import JsonLogger
 
+logger = logging.getLogger(__name__)
 
 class TradeType(Enum):
     BUY = "BUY"
@@ -114,7 +116,9 @@ class P2PBinanceClient(GenericBinanceClient):
         #     return f"Wrong tiker received: {fiat} or {asset}"
         bucket = await self._request_to_p2p_binance(fiat, trade_type, asset, banks)
         try:
-            return self.parse_price(bucket)
+            price = self.parse_price(bucket)
+            logger.debug(f"{fiat} to {asset} via {trade_type} is {price}")
+            return price
         except KeyError as e:
             self.logger.error("Incorrect ", exc_info=True)
             raise e

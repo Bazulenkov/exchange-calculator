@@ -1,8 +1,15 @@
 #!/usr/bin/env python
 import asyncio
+import logging
 from enum import Enum
 
 from binanceclient import P2PBinanceClient
+from configs import configure_logging
+
+BINANCE_RUSSIAN_BANKS = ["TinkoffNew"]
+
+# BINANCE_GEORGIAN_BANKS = ["CREDOBANK", "TBCbank", "BankofGeorgia"]
+BINANCE_GEORGIAN_BANKS = ["CREDOBANK", "TBCbank"]
 
 KORONAPAY_FEE_RUB = 0  # 99
 BINANCE_P2P_FEE_ADS_RUB_USDT_PERCENTS = 0.1
@@ -53,18 +60,18 @@ async def exchange_rub_usd_via_binance_p2p(amount_rub: int) -> float:
     p2p_client = P2PBinanceClient()
     async with p2p_client.session:
         rate_rub_usdt_ask: str = await p2p_client.get_exchange_rate(
-            "RUB", "USDT", "BUY", ["TinkoffNew"]
+            "RUB", "USDT", "BUY", BINANCE_RUSSIAN_BANKS
         )
         rate_rub_usdt_ads: str = await p2p_client.get_exchange_rate(
-            "RUB", "USDT", "SELL", ["TinkoffNew"]
+            "RUB", "USDT", "SELL", BINANCE_RUSSIAN_BANKS
         )
 
         rate_usdt_usd_ask: str = await p2p_client.get_exchange_rate(
-            "USD", "USDT", "SELL", ["CREDOBANK", "TBCbank", "BankofGeorgia"]
+            "USD", "USDT", "SELL", BINANCE_GEORGIAN_BANKS
         )
 
         rate_usdt_usd_ads: str = await p2p_client.get_exchange_rate(
-            "USD", "USDT", "BUY", ["CREDOBANK", "TBCbank", "BankofGeorgia"]
+            "USD", "USDT", "BUY", BINANCE_GEORGIAN_BANKS
         )
     amount_usdt_ads: float = (
         amount_rub
@@ -90,18 +97,18 @@ async def exchange_rub_gel_via_binance_p2p(amount_rub: int) -> float:
     p2p_client = P2PBinanceClient()
     async with p2p_client.session:
         rate_rub_usdt_ask: str = await p2p_client.get_exchange_rate(
-            "RUB", "USDT", "BUY", ["TinkoffNew"]
+            "RUB", "USDT", "BUY", BINANCE_RUSSIAN_BANKS
         )
         rate_rub_usdt_ads: str = await p2p_client.get_exchange_rate(
-            "RUB", "USDT", "SELL", ["TinkoffNew"]
+            "RUB", "USDT", "SELL", BINANCE_RUSSIAN_BANKS
         )
 
         rate_usdt_gel_ask: str = await p2p_client.get_exchange_rate(
-            "GEL", "USDT", "SELL", ["CREDOBANK", "TBCbank", "BankofGeorgia"]
+            "GEL", "USDT", "SELL", BINANCE_GEORGIAN_BANKS
         )
 
         rate_usdt_gel_ads: str = await p2p_client.get_exchange_rate(
-            "GEL", "USDT", "BUY", ["CREDOBANK", "TBCbank", "BankofGeorgia"]
+            "GEL", "USDT", "BUY", BINANCE_GEORGIAN_BANKS
         )
     amount_usdt_ads: float = (
         amount_rub
@@ -129,6 +136,9 @@ def exchange_rub_gel_via_koronapay_credo(
 
 
 if __name__ == "__main__":
+    configure_logging("calculate_best_money_transfer.log")
+    logger = logging.getLogger(__name__)
+    logger.info("Calculator started")
 
     async def main():
         amount = 100_000

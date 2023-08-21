@@ -8,6 +8,7 @@ import time
 from dotenv import load_dotenv
 
 from binanceclient import BinanceClient
+from configs import configure_logging
 from exceptions import TelegramError
 from utils import send_message
 
@@ -20,7 +21,7 @@ def check_tokens(telegram_token, chat_id):
 
 async def main():
     logger = logging.getLogger(__name__)
-    logger.debug("Bot started")
+    logger.info("Bot started")
 
     load_dotenv()
     telegram_token = os.getenv("TELEGRAM_TOKEN")
@@ -44,24 +45,17 @@ async def main():
             price = await asyncio.gather(task)
 
             message_to_send = message.format(symbol=symbol, price=price)
-            send_message(message_to_send, *args)
+            await send_message(message_to_send, *args)
         except TelegramError as e:
             logger.error(e, exc_info=True)
         except Exception as e:
             error_message = f" Сбой в работе программы: {e}"
-            send_message(error_message, *args)
+            await send_message(error_message, *args)
         finally:
             logger.info(f"The next check will be in {RETRY_TIME / 60} minutes.")
             time.sleep(RETRY_TIME)
 
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        format=(
-            "%(asctime)s [%(levelname)s] - "
-            "(%(filename)s).%(funcName)s:%(lineno)d - %(message)s"
-        ),
-        level=logging.DEBUG,
-        handlers=[logging.StreamHandler(sys.stdout)],
-    )
+    configure_logging("binance_client.log")
     asyncio.run(main())
