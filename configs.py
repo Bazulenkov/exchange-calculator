@@ -48,5 +48,6 @@ LOGGING_CONFIG = {
 def configure_logging(filename: str = "info.log"):
     log_dir = BASE_DIR / "logs"
     log_dir.mkdir(exist_ok=True)
+    filename = Path(filename).with_suffix('.log')
     LOGGING_CONFIG["handlers"]["rotating_file_handler"]["filename"] = log_dir / filename
     dictConfig(LOGGING_CONFIG)
