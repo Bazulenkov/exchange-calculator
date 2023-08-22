@@ -13,7 +13,8 @@ BINANCE_GEORGIAN_BANKS = ["CREDOBANK", "TBCbank"]
 
 KORONAPAY_FEE_RUB = 0  # 99
 BINANCE_P2P_FEE_ADS_RUB_USDT_PERCENTS = 0.1
-BINANCE_P2P_FEE_USDT_USD_PERCENTS = 0.35
+BINANCE_P2P_FEE_ADS_USDT_USD_PERCENTS = 0.35
+
 CREDO_EXCHANGE_RATE_USD_GEL: float = 2.6360
 
 
@@ -85,7 +86,7 @@ async def exchange_rub_usd_via_binance_p2p(amount_rub: int) -> float:
     amount_usd_ads: float = (
         amount_usdt
         * float(rate_usdt_usd_ads)
-        * (1 - BINANCE_P2P_FEE_USDT_USD_PERCENTS / 100)
+        * (1 - BINANCE_P2P_FEE_ADS_USDT_USD_PERCENTS / 100)
     )
     amount_usd: float = min(amount_usd_ask, amount_usd_ads)
 
