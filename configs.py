@@ -1,6 +1,10 @@
 from logging.config import dictConfig
 from pathlib import Path
 
+from dotenv import load_dotenv
+from pydantic import SecretStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 BASE_DIR = Path(__file__).parent
 
 DT_FORMAT = "%d.%m.%Y %H:%M:%S"
@@ -48,6 +52,18 @@ LOGGING_CONFIG = {
 def configure_logging(filename: str = "info.log"):
     log_dir = BASE_DIR / "logs"
     log_dir.mkdir(exist_ok=True)
-    filename = Path(filename).with_suffix('.log')
+    filename = Path(filename).with_suffix(".log")
     LOGGING_CONFIG["handlers"]["rotating_file_handler"]["filename"] = log_dir / filename
     dictConfig(LOGGING_CONFIG)
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8"  # , extra="forbid"
+    )
+    tg_bot_token: SecretStr
+
+
+load_dotenv()
+
+config = Settings()
