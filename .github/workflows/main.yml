@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 env:
-  SERVER_FOLDER_PATH: my-praktikum-bot
+  SERVER_FOLDER_PATH: exchange-calculator
 
 jobs:
   copy-changes:
