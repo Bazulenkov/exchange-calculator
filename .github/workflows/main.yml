@@ -35,7 +35,8 @@ jobs:
           source: ${{ steps.changed-files.outputs.all_changed_files }}
           target: ${{ env.SERVER_FOLDER_PATH }}
           files_ignore: |
-            {.github, .gitignore}/**
+            .github
+            .gitignore
 
   deploy:
     name: Rebuilding a project on a remote server
