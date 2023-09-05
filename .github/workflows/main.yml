@@ -20,10 +20,13 @@ jobs:
 
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v38
+        uses: tj-actions/changed-files@v39
         with:
           since_last_remote_commit: true
           separator: ","
+          files_ignore: |
+            .github
+            .gitignore
 
       - name: copy files to server
         uses: appleboy/scp-action@v0.1.4
@@ -34,9 +37,6 @@ jobs:
 #          port: ${{ secrets.PORT }}
           source: ${{ steps.changed-files.outputs.all_changed_files }}
           target: ${{ env.SERVER_FOLDER_PATH }}
-          files_ignore: |
-            .github
-            .gitignore
 
   deploy:
     name: Rebuilding a project on a remote server
