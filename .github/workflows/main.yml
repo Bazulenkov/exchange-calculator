@@ -34,7 +34,7 @@ jobs:
           key: ${{ secrets.KEY }}
 #          port: ${{ secrets.PORT }}
           source: ${{ steps.changed-files.outputs.all_changed_files }}
-          target: '~/$SERVER_FOLDER_PATH/'
+          target: my-praktikum-bot
 
   deploy:
     name: Rebuilding a project on a remote server
