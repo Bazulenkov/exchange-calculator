@@ -24,10 +24,10 @@ jobs:
         with:
           since_last_remote_commit: true
           separator: ","
-
+      - name: View env
+        run: echo $SERVER_FOLDER_PATH
       - name: copy files to server
         uses: appleboy/scp-action@v0.1.4
-        run: echo $SERVER_FOLDER_PATH
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
