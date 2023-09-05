@@ -51,8 +51,8 @@ jobs:
           key: ${{ secrets.KEY }}
           script: |
             cd ${{ env.SERVER_FOLDER_PATH }}
-            docker compose down
-            docker compose up --build
+            docker build -t calculator-exchange .
+            docker run --rm calculator-exchange
 
   send_message_to_telegram:
     runs-on: ubuntu-latest
