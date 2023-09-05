@@ -1,0 +1,67 @@
+name: Deploy container to VPS
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+env:
+  SERVER_FOLDER_PATH: my-praktikum-bot
+
+jobs:
+  copy-changes:
+    name: copy changed files to a remote server
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v38
+        with:
+          since_last_remote_commit: true
+          separator: ","
+
+      - name: copy files to server
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+#          port: ${{ secrets.PORT }}
+          source: ${{ steps.changed-files.outputs.all_changed_files }}
+          target: $SERVER_FOLDER_PATH
+
+  deploy:
+    name: Rebuilding a project on a remote server
+    runs-on: ubuntu-latest
+    needs: copy-changes
+    steps:
+      - name: executing remote ssh commands to deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          script: |
+            cd $SERVER_FOLDER_PATH
+            docker compose down
+            docker compose up --build
+
+  send_message_to_telegram:
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Send message
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            ${{ github.actor }} created commit:
+            Commit message: ${{ github.event.commits[0].message }}
+            Repository: ${{ github.repository }}
+            Deploy to VPS succeed!

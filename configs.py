@@ -59,7 +59,7 @@ def configure_logging(filename: str = "info.log"):
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8"  # , extra="forbid"
+        env_file=".env", env_file_encoding="utf-8" , extra="ignore"
     )
     tg_bot_token: SecretStr
 
