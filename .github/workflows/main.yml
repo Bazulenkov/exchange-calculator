@@ -52,7 +52,7 @@ jobs:
           script: |
             cd ${{ env.SERVER_FOLDER_PATH }}
             docker build -t calculator-exchange .
-            docker run --rm calculator-exchange
+            docker run --rm -e PYTHONUNBUFFERED=1 calculator-exchange
 
   send_message_to_telegram:
     runs-on: ubuntu-latest

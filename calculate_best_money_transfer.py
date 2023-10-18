@@ -3,6 +3,8 @@ import asyncio
 import logging
 from enum import Enum
 
+from faker import Faker
+
 from binanceclient import P2PBinanceClient
 from configs import configure_logging
 
@@ -15,7 +17,7 @@ KORONAPAY_FEE_RUB = 0  # 99
 BINANCE_P2P_FEE_ADS_RUB_USDT_PERCENTS = 0.1
 BINANCE_P2P_FEE_ADS_USDT_USD_PERCENTS = 0.35
 
-CREDO_EXCHANGE_RATE_USD_GEL: float = 2.6360
+CREDO_EXCHANGE_RATE_USD_GEL: float = 2.6670
 
 
 class KoronaCurrency(Enum):
@@ -37,9 +39,7 @@ async def get_korona_rate(receiving_currency: KoronaCurrency = KoronaCurrency.US
             "receivingMethod": "cash",
             "paidNotificationEnabled": "false",
         }
-        headers = {
-            "User-Agent": "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
-        }
+        headers = {"User-Agent": Faker().chrome()}
         async with session.get(
             korona_url, params=korona_params, headers=headers
         ) as response:
@@ -51,10 +51,10 @@ async def get_korona_rate(receiving_currency: KoronaCurrency = KoronaCurrency.US
                 return "Нет данных"
 
 
-def exchange_rub_usd_via_koronapay(amount_rub: int) -> float:
-    amount_usd = (amount_rub - KORONAPAY_FEE_RUB) / KORONAPAY_EXCHANGE_RATE_RUB_USD
-    exchange_rate_rub_usd = amount_rub / amount_usd
-    return exchange_rate_rub_usd
+# def exchange_rub_usd_via_koronapay(amount_rub: int) -> float:
+#     amount_usd = (amount_rub - KORONAPAY_FEE_RUB) / KORONAPAY_EXCHANGE_RATE_RUB_USD
+#     exchange_rate_rub_usd = amount_rub / amount_usd
+#     return exchange_rate_rub_usd
 
 
 async def exchange_rub_usd_via_binance_p2p(amount_rub: int) -> float:
@@ -138,17 +138,18 @@ def exchange_rub_gel_via_koronapay_credo(
 
 if __name__ == "__main__":
     configure_logging("calculate_best_money_transfer.log")
+    logging.getLogger("faker.factory").setLevel(logging.ERROR)
     logger = logging.getLogger(__name__)
     logger.info("Calculator started")
 
     async def main():
         amount = 100_000
-        task_exchange_rub_usd_via_binance_p2p = asyncio.create_task(
-            exchange_rub_usd_via_binance_p2p(amount)
-        )
-        task_exchange_rub_gel_via_binance_p2p = asyncio.create_task(
-            exchange_rub_gel_via_binance_p2p(amount)
-        )
+        # task_exchange_rub_usd_via_binance_p2p = asyncio.create_task(
+        #     exchange_rub_usd_via_binance_p2p(amount)
+        # )
+        # task_exchange_rub_gel_via_binance_p2p = asyncio.create_task(
+        #     exchange_rub_gel_via_binance_p2p(amount)
+        # )
         task_exchange_rub_usd_via_koronapay = asyncio.create_task(
             get_korona_rate(KoronaCurrency.USD)
         )
@@ -156,8 +157,8 @@ if __name__ == "__main__":
             get_korona_rate(KoronaCurrency.GEL)
         )
 
-        rub_usd_via_binance_p2p: float = await task_exchange_rub_usd_via_binance_p2p
-        rub_gel_via_binance_p2p: float = await task_exchange_rub_gel_via_binance_p2p
+        # rub_usd_via_binance_p2p: float = await task_exchange_rub_usd_via_binance_p2p
+        # rub_gel_via_binance_p2p: float = await task_exchange_rub_gel_via_binance_p2p
         rub_usd_via_koronapay: float = await task_exchange_rub_usd_via_koronapay
         rub_gel_via_koronapay: float = await task_exchange_rub_gel_via_koronapay
         rub_gel_via_koronapay_credo: float = exchange_rub_gel_via_koronapay_credo(
@@ -165,9 +166,9 @@ if __name__ == "__main__":
         )
 
         print("RUB to USD via Koronapay: ", rub_usd_via_koronapay)
-        print("RUB to USD via Binance: ", rub_usd_via_binance_p2p)
+        # print("RUB to USD via Binance: ", rub_usd_via_binance_p2p)
         print("RUB to GEL via Koronapay: ", rub_gel_via_koronapay)
         print("RUB to GEL via Koronapay and Credo: ", rub_gel_via_koronapay_credo)
-        print("RUB to GEL via Binance: ", rub_gel_via_binance_p2p)
+        # print("RUB to GEL via Binance: ", rub_gel_via_binance_p2p)
 
     asyncio.run(main())
