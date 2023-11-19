@@ -52,7 +52,7 @@ jobs:
           script: |
             cd ${{ env.SERVER_FOLDER_PATH }}
             docker build -t calculator-exchange .
-            docker run -d --rm calculator-exchange
+            docker run -d --name tg-bot-calculator-exchange --rm calculator-exchange
 
 
   send_message_to_telegram:
