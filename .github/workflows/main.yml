@@ -52,7 +52,6 @@ jobs:
           script: |
             cd ${{ env.SERVER_FOLDER_PATH }}
             docker build -t calculator-exchange .
-#            docker run --rm -e PYTHONUNBUFFERED=1 calculator-exchange
             docker run -d --rm calculator-exchange
 
 
