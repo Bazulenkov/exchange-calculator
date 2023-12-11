@@ -3,6 +3,7 @@ import asyncio
 import logging
 from enum import Enum
 
+import aiohttp
 from faker import Faker
 
 from binanceclient import P2PBinanceClient
@@ -26,20 +27,19 @@ class KoronaCurrency(Enum):
 
 
 async def get_korona_rate(receiving_currency: KoronaCurrency = KoronaCurrency.USD):
-    p2p_client = P2PBinanceClient()
-    async with p2p_client.session as session:
-        korona_url = "https://koronapay.com/transfers/online/api/transfers/tariffs"
-        korona_params = {
-            "sendingCountryId": "RUS",
-            "sendingCurrencyId": "810",
-            "receivingCountryId": "GEO",
-            "receivingCurrencyId": receiving_currency.value,
-            "paymentMethod": "debitCard",
-            "receivingAmount": "10000",
-            "receivingMethod": "cash",
-            "paidNotificationEnabled": "false",
-        }
-        headers = {"User-Agent": Faker().chrome()}
+    korona_url = "https://koronapay.com/transfers/online/api/transfers/tariffs"
+    korona_params = {
+        "sendingCountryId": "RUS",
+        "sendingCurrencyId": "810",
+        "receivingCountryId": "GEO",
+        "receivingCurrencyId": receiving_currency.value,
+        "paymentMethod": "debitCard",
+        "receivingAmount": "10000",
+        "receivingMethod": "cash",
+        "paidNotificationEnabled": "false",
+    }
+    headers = {"User-Agent": Faker().chrome()}
+    async with aiohttp.ClientSession() as session:
         async with session.get(
             korona_url, params=korona_params, headers=headers
         ) as response:
@@ -51,10 +51,25 @@ async def get_korona_rate(receiving_currency: KoronaCurrency = KoronaCurrency.US
                 return "Нет данных"
 
 
-# def exchange_rub_usd_via_koronapay(amount_rub: int) -> float:
-#     amount_usd = (amount_rub - KORONAPAY_FEE_RUB) / KORONAPAY_EXCHANGE_RATE_RUB_USD
-#     exchange_rate_rub_usd = amount_rub / amount_usd
-#     return exchange_rate_rub_usd
+# async def get_contact_rate(receiving_currency: ContactCurrency) -> float:
+#     contact_url = "https://online.contact-sys.com/transfer/where"
+#     contact_params = {"code": "GE"}
+#     headers = {"User-Agent": Faker().chrome()}
+#
+#     try:
+#         async with aiohttp.ClientSession() as session:
+#             async with session.get(
+#                 contact_url, params=contact_params, headers=headers
+#             ) as response:
+#                 contact_transactiond_id = await response.json()
+#                 # contact_rate = parse_contact_rate(contact_html)
+#                 return ...
+#     except aiohttp.ClientError as ce:
+#         raise ContactRateParseError(f"Aiohttp ClientError: {ce}")
+#     except json.JSONDecodeError as je:
+#         raise ContactRateParseError(f"JSON Decode Error: {je}")
+#     except Exception as e:
+#         raise ContactRateParseError(f"An unexpected error occurred: {e}")
 
 
 async def exchange_rub_usd_via_binance_p2p(amount_rub: int) -> float:
